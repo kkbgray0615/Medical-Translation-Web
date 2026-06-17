@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Clinical Translation Portal</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background-color: #f4f6f9;
+            margin: 0;
+            padding: 40px;
+            display: flex;
+            justify-content: center;
+        }
+        .container {
+            width: 100%;
+            max-width: 800px;
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+        }
+        h1 {
+            color: #1e293b;
+            margin-top: 0;
+            font-size: 24px;
+            border-bottom: 2px solid #e2e8f0;
+            padding-bottom: 10px;
+        }
+        .tag {
+            display: inline-block;
+            background-color: #eff6ff;
+            color: #2563eb;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            margin-bottom: 20px;
+        }
+        label {
+            font-weight: 600;
+            color: #475569;
+            display: block;
+            margin-bottom: 8px;
+        }
+        textarea {
+            width: 100%;
+            height: 120px;
+            padding: 12px;
+            border: 1px solid #cbd5e1;
+            border-radius: 8px;
+            box-sizing: border-box;
+            font-size: 15px;
+            resize: vertical;
+            margin-bottom: 20px;
+        }
+        textarea:focus {
+            outline: none;
+            border-color: #2563eb;
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+        button {
+            background-color: #2563eb;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            font-size: 16px;
+            font-weight: 600;
+            border-radius: 8px;
+            cursor: pointer;
+            width: 100%;
+            transition: background-color 0.2s;
+        }
+        button:hover {
+            background-color: #1d4ed8;
+        }
+        .output-box {
+            margin-top: 30px;
+            background-color: #f8fafc;
+            border: 1px dashed #cbd5e1;
+            border-radius: 8px;
+            padding: 20px;
+            min-height: 80px;
+            color: #334155;
+            font-size: 16px;
+            line-height: 1.5;
+        }
+        .placeholder-text {
+            color: #94a3b8;
+            font-style: italic;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Administrative Medical Translation Portal</h1>
+    <div class="tag">Compliance Architecture: Stateless / Non-Diagnostic</div>
+
+    <label for="clinicalInput">Paste Complex Clinical Vocabulary:</label>
+    <textarea id="clinicalInput" placeholder="Enter clinical notes, diagnoses, or complex terminology here... (e.g., 'The patient presents with acute idiopathic epistaxis.')"></textarea>
+
+    <button onclick="submitTranslation()">Translate to Patient-Friendly Literacy Level</button>
+
+    <label style="margin-top: 30px;">Patient-Facing Translation (6th-Grade Reading Level):</label>
+    <div id="translationOutput" class="output-box">
+        <span class="placeholder-text">The simplified translation will appear here instantly...</span>
+    </div>
+</div>
+
+<script>
+    async function submitTranslation() {
+        const inputText = document.getElementById('clinicalInput').value;
+        const outputDiv = document.getElementById('translationOutput');
+
+        if (!inputText.trim()) {
+            alert('Please enter some text to translate.');
+            return;
+        }
+
+        outputDiv.innerHTML = '<span class="placeholder-text">Processing text in memory...</span>';
+
+        try {
+            // Talk directly to your live PyCharm FastAPI backend server
+            const response = await fetch('https://medical-translation-api-ctsb.onrender.com//translate', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ complex_text: inputText })
+            });
+
+            const data = await response.json();
+
+            if (response.ok) {
+                // Display the clean output from the AI
+                outputDiv.style.fontStyle = 'normal';
+                outputDiv.style.color = '#0f172a';
+                outputDiv.innerText = data.translated_text;
+            } else {
+                outputDiv.innerHTML = `<span style="color: #dc2626;">Error: ${data.detail || 'Failed to translate'}</span>`;
+            }
+        } catch (error) {
+            outputDiv.innerHTML = '<span style="color: #dc2626;">Server Connection Error. Ensure your Uvicorn server is running in PyCharm.</span>';
+        }
+    }
+</script>
+
+</body>
+</html>
